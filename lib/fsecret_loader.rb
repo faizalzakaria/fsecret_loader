@@ -13,6 +13,8 @@ module FSecretLoader
     end
 
     def load
+      return if configuration.secret_id.empty?
+
       secrets.each_pair do |key, value|
         ENV[key.to_s] = value.to_s
       end

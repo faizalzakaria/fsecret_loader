@@ -7,6 +7,11 @@ RSpec.describe FsecretLoader do
     OpenStruct.new(secret_string: "{\n  \"username\":\"david\",\n  \"password\":\"123\"\n}\n")
   end
 
+  before do
+    ENV['username'] = nil
+    ENV['password'] = nil
+  end
+
   describe 'config' do
     it 'sets config values' do
       FSecretLoader.config do |config|
@@ -22,19 +27,38 @@ RSpec.describe FsecretLoader do
   describe 'load' do
     subject { FSecretLoader.load }
 
-    before do
-      FSecretLoader.config do |config|
-        config.secret_client = secret_client
-        config.secret_id = secret_id
+    context 'when secret_id is set' do
+      before do
+        FSecretLoader.config do |config|
+          config.secret_client = secret_client
+          config.secret_id = secret_id
+        end
+        allow(secret_client).to receive(:get_secret_value).with(secret_id: secret_id).and_return(sample_secret_response)
+        FSecretLoader.load
       end
-      allow(secret_client).to receive(:get_secret_value).with(secret_id: secret_id).and_return(sample_secret_response)
-      FSecretLoader.load
+
+      it 'sets the ENV correctly' do
+        aggregate_failures do
+          expect(ENV['username']).to eql('david')
+          expect(ENV['password']).to eql('123')
+        end
+      end
     end
 
-    it 'sets the ENV correctly' do
-      aggregate_failures do
-        expect(ENV['username']).to eql('david')
-        expect(ENV['password']).to eql('123')
+    context 'when secret_id is not set' do
+      before do
+        FSecretLoader.config do |config|
+          config.secret_client = nil
+          config.secret_id = nil
+        end
+        FSecretLoader.load
+      end
+
+      it "doesn't set ENV" do
+        aggregate_failures do
+          expect(ENV['username']).to be_nil
+          expect(ENV['password']).to be_nil
+        end
       end
     end
   end

@@ -13,6 +13,7 @@ module FSecretLoader
     end
 
     def load
+      # require 'pry'; binding.pry
       return if configuration.secret_id.nil?
 
       secrets.each_pair do |key, value|
@@ -22,6 +23,10 @@ module FSecretLoader
 
     def configuration
       @configuration ||= Configuration.new
+    end
+
+    def reset
+      @configuration = nil
     end
 
     private

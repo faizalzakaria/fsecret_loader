@@ -10,6 +10,7 @@ RSpec.describe FsecretLoader do
   before do
     ENV['username'] = nil
     ENV['password'] = nil
+    FSecretLoader.reset
   end
 
   describe 'config' do
@@ -47,10 +48,6 @@ RSpec.describe FsecretLoader do
 
     context 'when secret_id is not set' do
       before do
-        FSecretLoader.config do |config|
-          config.secret_client = nil
-          config.secret_id = nil
-        end
         FSecretLoader.load
       end
 

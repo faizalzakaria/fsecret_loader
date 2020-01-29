@@ -9,11 +9,19 @@ module FSecretLoader
       set_default_values
     end
 
+    def secret_client
+      @secret_client || default_client
+    end
+
     private
 
     def set_default_values
-      @secret_manager_client = Aws::SecretsManager::Client.new
       @secret_id             = ENV['AWS_SECRETS_MANAGER_ID']
+      @secret_manager_client = nil
+    end
+
+    def default_client
+      Aws::SecretsManager::Client.new
     end
   end
 end
